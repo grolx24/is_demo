@@ -1,0 +1,114 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Поля сущности лиды
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1>Информация о полях CRM сущности Лиды (ID, Название, Тип, Обязательное, Только для чтения, Неизменяемое, Множественное, Динамическое)</h1>
+        <button onclick="document.location='{% url 'reload_start'%}'">Назад</button>
+    </div>
+{% endblock header %}
+
+{% block styles %}
+    <style>
+    /* Основные стили для body */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+    
+    /* Стили для заголовка */
+    .header {
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px 20px;
+        text-align: center;
+        border-bottom: 2px solid #ddd;
+    }
+    
+    .header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+    
+    .header button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: white;
+        color: #4CAF50;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .header button:hover {
+        background-color: #ddd;
+    }
+    
+    /* Стили для таблицы */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background-color: white;
+    }
+    
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+    
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+    
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    
+    tr:hover {
+        background-color: #ddd;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Тип</th>
+                <th>Обязательное</th>
+                <th>Только для чтения</th>
+                <th>Неизменяемое</th>
+                <th>Множественное</th>
+                <th>Динамическое</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for k, v in table_fields.items %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ v.title }}</td>
+                    <td>{{ v.type }}</td>
+                    <td>{{ v.isRequired }}</td>
+                    <td>{{ v.isReadOnly }}</td>
+                    <td>{{ v.isImmutable }}</td>
+                    <td>{{ v.isMultiple }}</td>
+                    <td>{{ v.isDynamic }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>  
+    </table>
+{% endblock content %}

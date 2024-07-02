@@ -1,0 +1,108 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Отображение компаний в Базе Данных
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1>Отображение компаний в Базе Данных</h1>
+        <button onclick="document.location='{% url 'reload_start'%}'">Назад</button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <form id="save-companies-form" method="POST">
+            <button type="submit" id="submit-btn">Save Companies</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block styles %}
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+        .container {
+            margin: 200px;
+            text-align: center;
+            justify-content: center;
+
+            align-items: center;
+        }
+
+        button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+     </style>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const button = document.getElementById("submit-btn");
+
+            button.addEventListener("click", function() {
+                button.style.transition = "all 0.3s";
+                button.style.transform = "scale(1.1)";
+                button.innerHTML = "Saving...";
+                button.disabled = true;
+
+                fetch("{% url 'save_companies' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => {
+                    if (!response.ok)  throw new Error('Network response was not ok ' + response.statusText);
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    button.innerHTML = `Saved ${data} companies`;
+                    button.style.background = "green";
+
+                    setTimeout(function () {
+                        button.style.background = "#007bff";
+                        button.innerHTML = "Save Companies";
+                        button.disabled = false;
+                        button.style.transform = "scale(1)";
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    button.innerHTML = `Saved 0 companies`;
+                    button.style.background = "red";
+
+                    setTimeout(function () {
+                        button.style.background = "#007bff";
+                        button.innerHTML = "Save Companies";
+                        button.disabled = false;
+                        button.style.transform = "scale(1)";
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+{% endblock %}

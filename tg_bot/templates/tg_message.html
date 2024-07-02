@@ -1,0 +1,72 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Сортировка пользовательского поля
+{% endblock %}
+
+{% block styles %}
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+        }
+        .card-body h5 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+<div class="header">
+    <h1>Отправка сообщения тг ботом</h1>
+    <button class="btn btn-primary" onclick="goBack()">Назад</button>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Сначала отправьте боту @grolx_bot сообщение из любого чата, текст отправленного сообщения введите в соответствующее поле</h5>
+                        {% if error %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endif %}
+                        <form method="post" action="{% url 'tg_message' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="inputText">Текст для отправки с помощью бота</label>
+                                <input type="text" class="form-control" name="message" id="inputText" placeholder="Введите текст для отправки...">
+                            </div>
+                            <div class="form-group">
+                                <label for="initMessage">Сообщение, которое вы уже отправили боту</label>
+                                <input type="text" class="form-control" name="init_message" id="initMessage" placeholder="Введите уже отправленное сообщение...">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Отправить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+<script src="//api.bitrix24.com/api/v1/"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

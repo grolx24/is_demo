@@ -1,0 +1,29 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Робот который возвращает текущую погоду для точного адреса
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1>Робот который возвращает текущую погоду для точного адреса</h1>
+        <button onclick="document.location='{% url 'reload_start'%}'">Назад</button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <form action="{% url 'bitrix_robot_currency:install_robot' %}" method="POST">
+            <button class="c-button">Установить</button>
+        </form>
+
+        <form action="{% url 'bitrix_robot_currency:uninstall_robot' %}" method="POST">
+            <button class="c-button">Удалить</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="//api.bitrix24.com/api/v1/"></script>
+{% endblock %}
+{% load static %}

@@ -1,0 +1,110 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Сортировка пользовательского поля
+{% endblock %}
+
+{% block styles %}
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block header %}
+<div class="header">
+    <h1>Сортировка пользовательского поля</h1>
+    <button class="btn btn-primary" onclick="goBack()">Назад</button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Пользовательские поля</h3>
+            <ul class="list-group">
+                {% for user in name_user_fields %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <a href="#" onclick="sendPostRequest('{{ user.id }}'); return false;">
+                                {{ user.name }}
+                            </a>
+                        </span>
+                        <button class="btn btn-secondary btn-sm" onclick="sendSortRequest('{{ user.id }}'); return false;">Sort</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3>Список значений</h3>
+            <ul id="field-list" class="list-group">
+                <!-- Здесь будет отображаться список значений -->
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function sendPostRequest(userId) {
+        const xhr = new XMLHttpRequest();
+        const url = "{% url 'show_user_field' %}";
+        const params = `user_id=${userId}`;
+
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
+                    updateFieldList(response.user_field_list_value);
+                } else {
+                    alert('Error: ' + response.status);
+                }
+            }
+        };
+        xhr.send(params);
+    }
+
+    function sendSortRequest(userId) {
+        const xhr = new XMLHttpRequest();
+        const url = "{% url 'sort_user_field' %}";
+        const params = `user_id=${userId}`;
+
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
+                    updateFieldList(response.user_field_list_value);
+                } else {
+                    alert('Error: ' + response.status);
+                }
+            }
+        };
+        xhr.send(params);
+    }
+
+    function updateFieldList(fieldList) {
+        const fieldListContainer = document.getElementById('field-list');
+        fieldListContainer.innerHTML = '';  // Очистить текущий список
+
+        fieldList.forEach(function(field) {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            listItem.textContent = field;
+            fieldListContainer.appendChild(listItem);
+        });
+    }
+</script>
+<script src="//api.bitrix24.com/api/v1/"></script>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+{% endblock %}

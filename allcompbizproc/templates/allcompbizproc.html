@@ -1,0 +1,69 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Запуск бизнес процесса по всем компаниям
+{% endblock %}
+
+{% block styles %}
+    <style>
+        /* Стили для обертки формы */
+        .form-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Стили для формы */
+        .form {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        /* Стили для заголовка формы */
+        .form h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Стили для полей ввода */
+        .form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+        }
+
+        /* Стили для кнопки */
+        .form input {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Стили для кнопки при наведении */
+        .form input:hover {
+            background-color: #45a049;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1>Запуск бизнес процесса по всем компаниям</h1>
+        <button onclick="document.location='{% url 'reload_start'%}'">Назад</button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="form-wrapper">
+        <form action="{% url 'run' %}" method="post" class="form">
+            {{ form.as_p }}
+            <input type="submit" value="Запустить выбранный БП">
+        </form>
+    </div>
+{% endblock %}

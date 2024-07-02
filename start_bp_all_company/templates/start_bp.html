@@ -1,0 +1,112 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Запуск бизнес процесса по всем компаниям
+{% endblock %}
+
+{% block styles %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header button {
+            background-color: #ffffff;
+            border: none;
+            color: #4CAF50;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .header button:hover {
+            background-color: #45a049;
+            color: white;
+        }
+
+        .form-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 70vh;
+        }
+
+        .form {
+            background-color: white;
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .form input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .success-message {
+            text-align: center;
+            margin-top: 20px;
+            color: green;
+            font-size: 18px;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1>Запуск бизнес процессов по всем компаниям</h1>
+        <button onclick="goBack()">Назад</button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="form-wrapper">
+        <form action="{% url 'run' %}" method="post" class="form">
+            {% csrf_token %}
+            {% if success is not None %}
+                <div class="success-message">
+                    Успешно выполнено операций: {{ success }}
+                </div>
+            {% endif %}
+            {{ form.as_p }}
+            <input type="submit" value="Запустить выбранный БП">
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function goBack() {
+          window.history.back();
+        }
+    </script>
+{% endblock %}

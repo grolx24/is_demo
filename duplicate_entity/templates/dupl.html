@@ -1,0 +1,110 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Поиск дубликатов
+{% endblock %}
+
+{% block styles %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        form label {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        form select {
+            padding: 5px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        form button {
+            padding: 5px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+        }
+        form button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        table th {
+            background-color: #f1f1f1;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1>Поиск дубликатов</h1>
+        <button onclick="goBack()">Назад</button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post" id="myForm">
+        <label for="dropdown">Выберите элемент:</label>
+        <select id="dropdown" name="entity">
+            <option value="lead" {% if entity == 'lead' %}selected{% endif %}>Лиды</option>
+            <option value="deal" {% if entity == 'deal' %}selected{% endif %}>Сделки</option>
+            <option value="product" {% if entity == 'product' %}selected{% endif %}>Товары</option>
+            <option value="contact" {% if entity == 'contact' %}selected{% endif %}>Контакты</option>
+            <option value="company" {% if entity == 'company' %}selected{% endif %}>Компании</option>
+        </select>
+        <button type="submit">Найти дубликаты</button>
+    </form>
+    <table>
+      <tr>
+        <th>Товар</th>
+        <th>Количество дубликатов</th>
+      </tr>
+      {% for name, count in duplicates.items %}
+      <tr>
+        <td>{{ name }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+{% endblock %}
+
+{% block scripts %}
+    <script src="//api.bitrix24.com/api/v1/"></script>
+    <script>
+        function goBack() {
+          window.history.back();
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Поиск руководителей
+{% endblock %}
+
+{% block styles %}
+<style>
+    /* Общие стили */
+    body {
+        font-family: Arial, sans-serif;
+    }
+    /* Стили для заголовка */
+    .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .header h2 {
+        margin: 0;
+        text-align: center; /* Дополнительное выравнивание текста по центру */
+    }
+    /* Стили для контейнера формы */
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px; /* Расстояние между элементами формы */
+        margin-bottom: 20px;
+    }
+    /* Стили для формы */
+    #searchForm {
+        display: flex; /* Делает элемент flex-контейнером */
+        align-items: center; /* Центрирование по вертикали */
+        gap: 10px; /* Расстояние между полями ввода и кнопкой */
+    }
+    /* Стили для полей ввода */
+    input[type="text"], input[type="email"], select {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        flex: 1; /* Растягивается до доступного пространства */
+    }
+    /* Стили для кнопки */
+    button[type="submit"] {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+    /* Стили для таблицы */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px; /* Немного отступим сверху */
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px; /* Увеличим отступы для лучшей читаемости */
+        text-align: left;
+    }
+    th {
+        background-color: #d5d5d5;
+        color: #242424;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:nth-child(odd) {
+        background-color: #fff;
+    }
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h2>Поиск руководителей по департаментам</h2>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <form id="searchForm" method="POST" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+    </form>
+    <button type="submit" form="searchForm">Найти</button>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Отдел сотрудника</th>
+            <th>Руководитель</th>
+            <th>Порядок</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in table %}
+            <tr>
+                <td><a href="https://{{ domain }}/company/personal/user/{{ row.user_id }}/" target="_blank">{{ row.employee }}</a></td>
+                <td>{{ row.dep_employee }}</td>
+                <td>{{ row.supervisor }}</td>
+                <td>{{ row.order }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

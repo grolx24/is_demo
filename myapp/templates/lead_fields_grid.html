@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>lead fields grid</title>
+    <script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.js"></script>    
+</head>
+<body>
+<button style="margin-bottom: 5px; float: right" onclick="document.location='{% url 'reload_start'%}'">Назад</button>
+<div id="leadFieldsGrid" style="height: 100vh; width: 100vw; padding-top: 40px" class="ag-theme-alpine"></div>
+
+<script>
+    let gridOptions = {
+                rowData: {{ table_fields|safe }},
+                defaultColDef: {
+                    floatingFilter: true, // небольшого поля фильтра под заголовком каждого столбца
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                },
+                columnDefs: [
+                    {headerName: "Название", field: "title", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Идентификатор", field: "id", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Динамический", field: "isDynamic", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Неизменяемый", field: "isImmutable", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Множественный", field: "isMultiple", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Только для чтения", field: "isReadOnly", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Необходимый", field: "isRequired", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Тип", field: "type", rowGroup: false, resizable: true, autoHeight: true,},
+                ],
+                sideBar: true,
+                rowGroupPanelShow: "always",
+                onGridReady: (params) => { params.api.autoSizeAllColumns(); }
+        };
+    document.addEventListener("DOMContentLoaded", () => {
+        let gridDiv = document.querySelector("#leadFieldsGrid");
+        new agGrid.Grid(gridDiv, gridOptions);
+    });
+
+</script>
+</body>
+</html>

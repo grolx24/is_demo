@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.js"></script>
+</head>
+<style>
+    img {
+      max-height:100px;
+    }
+</style>
+<body>
+<button style="margin-bottom: 5px; float: right" onclick="document.location='{% url 'reload_start'%}'">Назад</button>
+<div id="employeeGrid" style="height: 100vh; width: 100vw; padding-top: 40px" class="ag-theme-alpine"></div>
+
+<script>
+    const users = {{ json_user_list|safe }};
+    const departments = Object.values({{ json_departments_list|safe }}).map(value => value.NAME);
+    let gridOptions = {
+                defaultColDef: {
+                    floatingFilter: true,
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                },
+                columnDefs: [
+                    {headerName: "Фото", field: "PERSONAL_PHOTO", rowGroup: false, resizable: true, autoHeight: true,
+                        cellRenderer: (params) => {
+                            let imgUrl = params.data.PERSONAL_PHOTO;
+                            return `<img src="${imgUrl}" alt="img not found">`;},
+                    },
+                    {headerName: "Сотрудник", field: "FULL_NAME", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Статус", field: "IS_ONLINE", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Пол", field: "PERSONAL_GENDER", rowGroup: false, resizable: true, autoHeight: true,},
+                    {
+                        headerName: "Подразделение",
+                        field: "DEPARTMENTS",
+                        rowGroup: false,
+                        resizable: true,
+                        autoHeight: true,
+                        cellStyle: {'white-space': 'pre'},
+                        filter:  'agSetColumnFilter',
+                        filterParams: {
+                            values: departments,
+                            suppressSelectAll: true,
+                            defaultToNothingSelected: true
+                        }
+                    },
+                    {headerName: "Должность", field: "WORK_POSITION", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Дата трудоустройства", cellDataType: 'date', rowGroup: false, resizable: true, autoHeight: true,
+                        filter: 'agDateColumnFilter',
+                        filterParams: {
+                            comparator: (filterLocalDateAtMidnight, cellValue) => {
+                                if (cellValue === undefined) return -1;
+                                const filterTime = filterLocalDateAtMidnight.getTime();
+                                const cellTime = cellValue.getTime();
+                                return (cellTime === filterTime) ? 0 : (cellTime < filterTime) ? -1 : 1;
+                            }
+                        },
+                        valueGetter: (params) => {
+                            if (!(params.data['DATE_REGISTER'] === '')) {
+                                let date = new Date(params.data['DATE_REGISTER']);
+                                date.setHours(0);
+                                return date;
+                            }
+                        },
+                        valueFormatter: (params) => {
+                            if (params.value === undefined) {
+                                return '';
+                            }
+                            console.log(params);
+                            console.log(params.value);
+                            const day = String(params.value.getDate()).padStart(2, '0');
+                            const month = String(params.value.getMonth() + 1).padStart(2, '0');
+                            const year = params.value.getUTCFullYear();
+                            return day + '.' + month + '.' + year;
+                        },
+                    },
+                    {headerName: "E-mail", field: "EMAIL", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Личный телефон", field: "PERSONAL_MOBILE", rowGroup: false, resizable: true, autoHeight: true,},
+                    {headerName: "Дата рождения", field: "PERSONAL_BIRTHDAY", rowGroup: false, resizable: true, autoHeight: true,},
+                ],
+                rowData: users,
+                columnTypes: {numberValue: {aggFunc: 'sum'}},
+                sideBar: true,
+                rowGroupPanelShow: "always",
+                onGridReady: (params) => { params.columnApi.autoSizeAllColumns(); }
+        };
+    document.addEventListener("DOMContentLoaded", () => {
+        let gridDiv = document.querySelector("#employeeGrid");
+        new agGrid.Grid(gridDiv, gridOptions);
+
+        // Строки пройдут через фильтр, если все выбранные подразделения присутствуют в
+        // подразделениях пользователя. Если нет выбранных подразделений, строка не пройдет фильтр.
+        const myDoesFilterPassFunction = function(params) {
+            this.checkboxLabels = this.eGui.querySelectorAll('.ag-checkbox-label');
+            this.selectedDepartments = [];
+            this.checkboxLabels.forEach(label => {
+                const wrapper = label.nextElementSibling;
+                if (wrapper && wrapper.classList.contains('ag-checked')) {
+                    const labelText = label.textContent.trim();
+                    this.selectedDepartments.push(labelText);
+                }
+            });
+            const userDepartments = params.data.DEPARTMENTS.split('\n');
+            if (this.selectedDepartments.length > 0) {
+                return this.selectedDepartments.every(department => userDepartments.includes(department));
+            } else {
+                return false;
+            }
+        }
+
+        let departmentsFilter = gridOptions.api.getFilterInstance('DEPARTMENTS');
+        departmentsFilter.doesFilterPass = myDoesFilterPassFunction;
+
+    });
+
+</script>
+</body>
+</html>

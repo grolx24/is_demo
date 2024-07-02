@@ -1,0 +1,133 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Загрузка звонка (.mp3) на портал Битрикс24
+{% endblock %}
+
+{% block styles %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #0073e6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header button {
+            background-color: #005bb5;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .header button:hover {
+            background-color: #004080;
+        }
+
+        .form122 {
+            background-color: white;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form122 h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group122 {
+            margin-bottom: 15px;
+        }
+
+        .form-group122 label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group122 input,
+        .form-group122 select,
+        .form-group122 textarea {
+            width: calc(100% - 20px); /* Уменьшаем ширину на 20px, чтобы добавить отступ */
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .input122 {
+            background-color: #0073e6;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .input122:hover {
+            background-color: #005bb5;
+        }
+
+        .input122:active {
+            background-color: #004080;
+        }
+    </style>
+
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1 class="h122">Загрузка звонка (.mp3) на портал Битрикс24</h1>
+        <button onclick="goBack()">Назад</button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <form class="form122" action="{% url 'register_call' %}" method="POST" enctype="multipart/form-data">
+        <h2>Регистрация звонка</h2>
+        {% csrf_token %}
+        <div class="form-group122">
+            {{ form.as_p }}
+        </div>
+        <p><input class="input122" type="submit" value="Сохранить звонок"></p>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    <script src="//api.bitrix24.com/api/v1/"></script>
+    <script>
+        function goBack() {
+          window.history.back();
+        }
+    </script>
+{% endblock %}

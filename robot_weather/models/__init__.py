@@ -1,0 +1,1 @@
+from robot_weather.models.robot_weather_model import WeatherRobot

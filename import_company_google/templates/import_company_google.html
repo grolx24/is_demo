@@ -1,0 +1,20 @@
+{% extends "base_app.html" %}
+
+{% block title %}
+    Импорт компаний из Google Таблицы
+{% endblock %}
+
+{% block header %}
+    <div class="header">
+        <h1>Импорт компаний из Google Таблицы</h1>
+        <button onclick="document.location='{% url 'reload_start'%}'">Назад</button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <form action="{% url 'import_company_google'%}" method="post">
+        <p class="text">Добавьте ссылку на google таблицы: <input type="text" name="link"></p>
+        <button class="c-button" type="submit">Получить</button>
+    </form>
+    <p>{{ result }}</p>
+{% endblock %}
