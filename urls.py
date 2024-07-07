@@ -61,5 +61,6 @@ urlpatterns = [
     path('save_companies/', include('save_companies_bd.urls')),
     path('move_deadline_task/', include('move_deadline_task.urls')),
     path('map_companies/', include('map_companies.urls')),
+    path('chat_bot/', include('chat_bot.urls')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

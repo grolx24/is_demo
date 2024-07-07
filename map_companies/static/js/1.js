@@ -1,64 +1,93 @@
-jQuery(function () {
-    ymaps.ready(function () {
-        var mapCenter = [55.755381, 37.619044],
-            map = new ymaps.Map('map', {
-                center: mapCenter,
-                zoom: 10,
-                controls: []
-            }),
-            placemarks = [];
+document.addEventListener('DOMContentLoaded', function () {
+    // Инициализация карты
+    ymaps.ready(init);
 
-        // Создаем собственный макет с информацией о выбранном геообъекте.
-        var customBalloonContentLayout = ymaps.templateLayoutFactory.createClass([
-                '<ul class=list>',
-                // Выводим в цикле список всех геообъектов.
-                '{% for geoObject in properties.geoObjects %}',
-                    '<li><a href=# data-placemarkid="{{ geoObject.properties.placemarkId }}" class="list_item">{{ geoObject.properties.balloonContentHeader|raw }}</a></li>',
-                '{% endfor %}',
-                '</ul>'
-            ].join(''));
-
-
-        jQuery(document).on( "click", "a.list_item", function() {
-            // Определяем по какой метке произошло событие.
-            var selectedPlacemark = placemarks[jQuery(this).data().placemarkid];
-            alert( selectedPlacemark.properties.get('balloonContentBody') );
+    function init() {
+        let myMap = new ymaps.Map("map", {
+            center: [60, 30.3], // Координаты спб
+            zoom: 10
         });
 
-        var clusterer = new ymaps.Clusterer({
-            clusterDisableClickZoom: true,
-            clusterOpenBalloonOnClick: true,
-            // Устанавливаем режим открытия балуна.
-            // В данном примере балун никогда не будет открываться в режиме панели.
-            clusterBalloonPanelMaxMapArea: 0,
-            // По умолчанию опции балуна balloonMaxWidth и balloonMaxHeight не установлены для кластеризатора,
-            // так как все стандартные макеты имеют определенные размеры.
-            clusterBalloonMaxHeight: 200,
-            // Устанавливаем собственный макет контента балуна.
-            clusterBalloonContentLayout: customBalloonContentLayout
-        });
+        // Координаты углов квадрата
+        const topLeft = [60.3, 29.7];
+        const bottomRight = [59.5, 30.99];
+        const startPoint = [59.83, 30.4]; // 60.052110, 30.423710
 
-        // Заполняем кластер геообъектами со случайными позициями.
-        for (var i = 0, l = 100; i < l; i++) {
-            var placemark = new ymaps.Placemark(getRandomPosition(), {
-                // Устаналиваем данные, которые будут отображаться в балуне.
-                balloonContentHeader: 'Заголовок метки №' + (i + 1),
-                balloonContentBody: 'Информация о метке №' + (i + 1),
-                placemarkId: i
-            });
-            placemarks.push(placemark);
+        // Количество точек (30 x 30 = 900)
+        const numPoints = 40;
+        const latStep = (topLeft[0] - bottomRight[0]) / (numPoints);
+        const lonStep = (bottomRight[1] - topLeft[1]) / (numPoints);
+
+        // Создаем коллекцию геообъектов
+        let geoObjects = new ymaps.GeoObjectCollection();
+
+        // Генерация точек внутри квадрата
+        for (let i = 0; i < numPoints; i++) {
+            for (let j = 0; j < numPoints; j++) {
+                const lat = bottomRight[0] + i * latStep;
+                const lon = topLeft[1] + j * lonStep;
+                const point = [lat, lon];
+
+                // Построение маршрута и вывод времени в пути в консоль
+                let multiRoute = new ymaps.multiRouter.MultiRoute({
+                    referencePoints: [point, startPoint],
+                    params: { routingMode: 'masstransit' } // Использование общественного транспорта
+                }, {
+                    // Опции маршрута
+                    wayPointStartIconColor: "blue",
+                    wayPointFinishIconColor: "red",
+                    routeStrokeColor: "0000ffff"
+                });
+
+                multiRoute.model.events.add('requestsuccess', function() {
+                    // Получаем маршруты
+                    let routes = multiRoute.getRoutes();
+                    if (routes.getLength() > 0) {
+                        let route = routes.get(0);
+                        let routeTimeText = route.properties.get('duration').text;
+
+                        let routeTimeParts = routeTimeText.split(/\s+/);
+                        let routeTimeMinutes = 0;
+
+                        // Обработка времени маршрута
+                        if (routeTimeParts.includes("ч")) {
+                            let hoursIndex = routeTimeParts.indexOf("ч") - 1;
+                            let hours = parseInt(routeTimeParts[hoursIndex]);
+                            let minutesIndex = routeTimeParts.indexOf("мин") - 1;
+                            let minutes = parseInt(routeTimeParts[minutesIndex]);
+                            routeTimeMinutes = hours * 60 + minutes;
+                        } else {
+                            routeTimeMinutes = parseInt(routeTimeParts[routeTimeParts.length - 2]);
+                        }
+
+                        console.log(`${lat}, ${lon}:`, routeTimeMinutes);
+
+                        // Определяем цвет метки в зависимости от времени маршрута
+                        let color = "blue"; // значение по умолчанию
+                        if (routeTimeMinutes < 30) {
+                            color = "green";
+                        } else if (routeTimeMinutes < 45) {
+                            color = "yellow";
+                        } else if (routeTimeMinutes < 60) {
+                            color = "red";
+                        } else if (routeTimeMinutes < 75) {
+                            color = "black";
+                        }
+
+                        // Если время в пути меньше 75 минут, добавляем метку
+                        if (routeTimeMinutes < 75) {
+                            let placemark = new ymaps.Placemark(point, {
+                                balloonContent: `${point}: ${routeTimeText}`
+                            }, {
+                                preset: `islands#${color}DotIcon` // используем цветную метку
+                            });
+                            geoObjects.add(placemark);
+                        }
+                    }
+                });
+            }
         }
-
-        clusterer.add(placemarks);
-        map.geoObjects.add(clusterer);
-
-
-        function getRandomPosition () {
-            return [
-                mapCenter[0] + (Math.random() * 0.3 - 0.15),
-                mapCenter[1] + (Math.random() * 0.5 - 0.25)
-            ];
-        }
-        clusterer.balloon.open(clusterer.getClusters()[0]);
-    });
+        // Добавляем все созданные геообъекты на карту
+        myMap.geoObjects.add(geoObjects);
+    }
 });

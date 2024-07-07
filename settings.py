@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'save_companies_bd',
     'move_deadline_task',
     'map_companies',
+    'chat_bot',
 ]
 
 MIDDLEWARE = [
