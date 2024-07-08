@@ -3,6 +3,7 @@ from chat_bot.utils.intent_detection import IntentDetection
 from chat_bot.utils.tasks_bitrix import TasksBitrix
 
 
+
 class TextReqAnswer:
     def __init__(self, but, input_message, user_id, chat_id):
         self.but = but
@@ -15,10 +16,28 @@ class TextReqAnswer:
         self.intent_detector = IntentDetection()
         self.tasks_bitrix = TasksBitrix(but)
 
-    def success_extract(self, message):
-        bot_send_message(self.but, message, self.chat_id)
-        res = self.but.call_api_method("app.option.set", {"options": {self.option: "-"}})["result"]
-        if not res:
+    def success_extract(self, choice, dict_params):
+        bitrix_methods = {
+            Choices.CREATE: self.tasks_bitrix.create_task,
+            Choices.UPDATE: self.tasks_bitrix.update_task,
+            Choices.SHOW: self.tasks_bitrix.show_tasks,
+            Choices.REPORT: self.tasks_bitrix.report,
+        }
+        messages = {
+            Choices.CREATE: "создана",
+            Choices.UPDATE: "обновлена",
+            Choices.SHOW: "показана",
+            Choices.REPORT: "отчет",
+        }
+
+        result = bitrix_methods[choice](dict_params)
+
+        if choice == Choices.SHOW or choice == Choices.REPORT:
+            bot_send_attach(self.but, messages[choice], result, self.chat_id)
+        else:
+            bot_send_message(self.but, messages[choice], self.chat_id)
+
+        if not self.but.call_api_method("app.option.set", {"options": {self.option: "-"}})["result"]:
             raise ValueError("app.option.set")
 
     def error_extract(self, user_choice):
@@ -40,35 +59,23 @@ class TextReqAnswer:
             case "создать задачу":
                 dict_params = self.intent_detector.extract_parameters_create(self.input_message)
                 if dict_params:
-                    self.tasks_bitrix.create_task(dict_params, self.user_id, self.input_message)
-                    self.success_extract("создана")
+                    dict_params["CREATED_BY"] = self.user_id
+                    self.success_extract(Choices.CREATE, dict_params)
                 else:
                     self.error_extract(user_choice)
-
             case "изменить задачу":
                 dict_params = self.intent_detector.extract_parameters_update(self.input_message)
                 if dict_params:
-                    self.tasks_bitrix.update_task(dict_params)
-                    self.success_extract("изменена")
+                    self.success_extract(Choices.UPDATE, dict_params)
                 else:
                     self.error_extract(user_choice)
-
             case "показать задачи":
                 dict_params = self.intent_detector.extract_parameters_show(self.input_message)
                 if dict_params:
-                    tasks = self.tasks_bitrix.show_tasks(dict_params)
-                    for i in tasks:
-                        bot_send_message(self.but, str(i), self.chat_id)
-                    if self.but.call_api_method("app.option.set", {"options": {self.option: "-"}})["result"] is None:
-                        raise ValueError("app.option.set")
+                    self.success_extract(Choices.SHOW, dict_params)
                 else:
                     self.error_extract(user_choice)
-
             case "сгенерировать отчет":
-                # dict_params = NER_gen_rep(input_message)
-                self.tasks_bitrix.gen_report()
-                bot_send_message("сгенерирован", self.chat_id)
-                if self.but.call_api_method("app.option.set", {"options": {self.option: "-"}})["result"] is None:
-                    raise ValueError("app.option.set")
+                self.success_extract(Choices.REPORT, {})
             case _:
                 self.success_extract("я не понял вас")
