@@ -1,20 +1,20 @@
-from chat_bot.utils.api_methods import *
+from chat_bot.utils.chat_keyboard import *
 from chat_bot.utils.intent_detection import IntentDetection
 from chat_bot.utils.tasks_bitrix import TasksBitrix
 
 
-
-class TextReqAnswer:
+class TaskRequestHandler:
     def __init__(self, but, input_message, user_id, chat_id):
         self.but = but
         self.input_message = input_message
         self.user_id = user_id
-        self.chat_id = chat_id
+        self.dialog_id = chat_id
 
-        self.option = f"wait_next_{self.user_id}_{self.chat_id}"
+        self.option = f"wait_next_{self.user_id}_{self.dialog_id}"
 
         self.intent_detector = IntentDetection()
         self.tasks_bitrix = TasksBitrix(but)
+        self.chat_keyboards = ChatKeyboard(but)
 
     def success_extract(self, choice, dict_params):
         bitrix_methods = {
@@ -24,25 +24,25 @@ class TextReqAnswer:
             Choices.REPORT: self.tasks_bitrix.report,
         }
         messages = {
-            Choices.CREATE: "создана",
-            Choices.UPDATE: "обновлена",
-            Choices.SHOW: "показана",
-            Choices.REPORT: "отчет",
+            Choices.CREATE: "задача создана",
+            Choices.UPDATE: "задача изменена",
+            Choices.SHOW: "задачи:",
+            Choices.REPORT: "отчет:",
         }
 
         result = bitrix_methods[choice](dict_params)
 
         if choice == Choices.SHOW or choice == Choices.REPORT:
-            bot_send_attach(self.but, messages[choice], result, self.chat_id)
+            self.chat_keyboards.bot_send_attach(messages[choice], result, self.dialog_id)
         else:
-            bot_send_message(self.but, messages[choice], self.chat_id)
+            self.chat_keyboards.bot_send_message(messages[choice], self.dialog_id)
 
         if not self.but.call_api_method("app.option.set", {"options": {self.option: "-"}})["result"]:
             raise ValueError("app.option.set")
 
     def error_extract(self, user_choice):
         message = "Для того, чтобы " + user_choice + ", введите параметры"
-        bot_send_message(self.but, message, self.chat_id)
+        self.chat_keyboards.bot_send_message(message, self.dialog_id)
         res = self.but.call_api_method("app.option.set", {"options": {self.option: user_choice}})["result"]
         if not res:
             raise ValueError("app.option.set")
@@ -78,4 +78,4 @@ class TextReqAnswer:
             case "сгенерировать отчет":
                 self.success_extract(Choices.REPORT, {})
             case _:
-                self.success_extract("я не понял вас")
+                self.success_extract("я не понял вас", {})

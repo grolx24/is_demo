@@ -46,15 +46,15 @@ class AbstractChat(models.Model):
     @classmethod
     def from_update(cls, update, bot):
         if update.message:
-            chat_id = update.message.chat_id
+            chat_id = update.message.dialog_id
             chat_type = update.message.chat.type
 
         elif update.callback_query:
-            chat_id = update.callback_query.message.chat_id
+            chat_id = update.callback_query.message.dialog_id
             chat_type = update.callback_query.message.chat.type
 
         elif update.edited_message:
-            chat_id = update.edited_message.chat_id
+            chat_id = update.edited_message.dialog_id
             chat_type = update.edited_message.chat.type
 
         elif update.chat_join_request:

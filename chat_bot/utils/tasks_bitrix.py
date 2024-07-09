@@ -31,13 +31,6 @@ class TasksBitrix:
             raise ValueError
         return res
 
-    """
-            "ATTACH": [
-            {"MESSAGE": "API будет доступно [CHAT=52]текст[/CHAT] в обновлении [B]im 16.0.0[/B]"},
-            {"DELIMITER": {"SIZE": "200", "COLOR": "#a6a6a6"}},
-            {"USER": {"NAME": "Иван Иванов", "BOT_ID": "26"}},
-        ]
-    """
     def show_tasks(self, dict_params):
         list_tasks = self.but.call_api_method('tasks.task.list', {
             "select": ['ID', 'TITLE', 'STATUS'], "filter": dict_params})["result"]["tasks"]
@@ -52,7 +45,7 @@ class TasksBitrix:
 
         return attach
 
-    def report(self, dict_params):
+    def report(self, _):
         list_tasks = self.but.call_api_method('tasks.task.list', {"select": ["ID", "TITLE", "CREATED_BY",
             "CREATED_DATE", "STATUS", "DEADLINE", "RESPONSIBLE_ID"]})["result"]["tasks"]
 

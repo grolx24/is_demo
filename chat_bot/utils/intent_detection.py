@@ -1,6 +1,6 @@
 import json
 import requests
-
+from chat_bot.models.intent_detection_history import IntentDetectionHistory
 from settings import CHAD_API_KEY
 
 
@@ -10,10 +10,17 @@ class IntentDetection:
     def __init__(self, api_key=CHAD_API_KEY):
         self.api_key = api_key
 
-    def _send_request(self, prompt, temperature=0.1):
+    def _send_request(self, prompt, input_message, goal):
+        try:
+            history_record = IntentDetectionHistory.objects.get(input_message=input_message, goal=goal)
+            print("use bd")
+            return history_record.intent_response
+        except IntentDetectionHistory.DoesNotExist:
+            print("DoesNotExist")
+
         request_json = {
-            "message": prompt,
-            "temperature": temperature,
+            "message": f"{prompt}\nСообщение пользователя: {input_message}",
+            "temperature": 0.1,
             "api_key": self.api_key
         }
         response = requests.post(url=self.BASE_URL, json=request_json)
@@ -22,7 +29,11 @@ class IntentDetection:
         if not resp_json.get("is_success"):
             raise ValueError("Failed to get a successful response from the API")
 
-        return resp_json["response"]
+        intent_response = resp_json["response"]
+
+        IntentDetectionHistory.objects.create(input_message=input_message, intent_response=intent_response, goal=goal)
+
+        return intent_response
 
     def detect_intent(self, input_message):
         prompt = (
@@ -37,7 +48,7 @@ class IntentDetection:
             "Запрос: привет, как дела? "
             "Ответ: ошибка"
         )
-        return self._send_request(f"{prompt}\nСообщение пользователя: {input_message}", temperature=0.05)
+        return self._send_request(prompt, input_message, "intent")
 
     def extract_parameters_create(self, input_message):
         params = {"Название": "TITLE", "Приоритет": "PRIORITY", "Исполнитель": "RESPONSIBLE_ID", "Крайний срок": "DEADLINE"}
@@ -50,7 +61,7 @@ class IntentDetection:
             "Пример запроса: Добавь новую задачу 'Запуск рекламной кампании' с дедлайном 06.07.24 для Иванова Ивана. "
             "Пример ответа: { Название: Запуск рекламной кампании, Исполнитель: Иванов Иван, Крайний срок: 06.07.24 }"
         )
-        dict_res = json.loads(self._send_request(f"{prompt}\nСообщение пользователя: {input_message}"))
+        dict_res = json.loads(self._send_request(prompt, input_message, "create"))
         dict_params = {params[key]: val for key, val in dict_res.items()}
         dict_params["DESCRIPTION"] = input_message
 
@@ -69,7 +80,7 @@ class IntentDetection:
             "Пример запроса: Сделай задачу 132 завершенной. "
             "Пример ответа: { Статус: завершенный, Идентификатор задачи: 132 }"
         )
-        dict_res = json.loads(self._send_request(f"{prompt}\nСообщение пользователя: {input_message}"))
+        dict_res = json.loads(self._send_request(prompt, input_message, "update"))
         res = {params[key]: val for key, val in dict_res.items()}
         if "STATUS" in res:
             res["STATUS"] = "5" if res["STATUS"] == "завершенный" else "2"
@@ -90,7 +101,7 @@ class IntentDetection:
             "Пример ответа: { \"Идентификатор задачи\": 118 }"
         )
 
-        dict_params = json.loads(self._send_request(f"{prompt}\nСообщение пользователя: {input_message}"))
+        dict_params = json.loads(self._send_request(prompt, input_message, "show"))
         dict_params = {params[k]: v for k, v in dict_params.items()}
         if "STATUS" in dict_params:
             dict_params["STATUS"] = "5" if dict_params["STATUS"] == "завершенные" else "2"

@@ -1,9 +1,9 @@
 from django.urls import path
 
-from chat_bot.views import chat_bot, register_bot_view, command_intent
+from chat_bot.views.text_req import chat_bot
+from chat_bot.views.command_req import command
 
 urlpatterns = [
     path('main', chat_bot, name="chat_bot"),
-    path('register_bot_view/', register_bot_view, name="register"),
-    path('command_intent/', command_intent, name="command_intent"),
+    path('command_intent/', command, name="command_intent"),
 ]
